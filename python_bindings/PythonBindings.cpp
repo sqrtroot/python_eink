@@ -57,18 +57,13 @@ namespace PYBIND11_NAMESPACE {
              * indicates whether implicit conversions should be applied.
              */
             bool load(handle src, bool) {
-                /* Extract PyObject from handle */
-                PyObject * source = src.ptr();
-                PyObject * tmp = PyByteArray_FromObject(source);
-                if (!tmp) {
-                    log(LogLevel::Error, "Failed conversion");
+                type_caster<std::string> string_caster;
+                bool result = string_caster.load(src, false); // input bool is ignored
+                if(!result) {
+                    log(LogLevel::Error, "Failed to convert to string");
                     return false;
                 }
-
-                value = std::filesystem::path(
-                        std::string_view(PyByteArray_AS_STRING(tmp), PyByteArray_GET_SIZE(tmp)));
-                log(LogLevel::Error, "Help");
-                Py_DECREF(tmp);
+                value = std::filesystem::path((std::string)string_caster);
                 return true;
             }
 
